@@ -1,5 +1,8 @@
 import pygame
- 
+
+### Game Globals ###
+
+DEBUG = True
 
 ### Board Init ###
 
@@ -11,25 +14,54 @@ RED = (255, 0, 0)
  
 # This sets the WIDTH and HEIGHT of each board tile
 WIDTH = 40
-HEIGHT = 40
+HEIGHT = WIDTH
  
 # This sets the margin between each tile
-MARGIN = 3
+MARGIN = 1
 
-# Create the chess board
-board = []
-flop = True
-for row in range(8):
-    board.append([])
-    flop = not flop
-    for column in range(8):
-        if flop:
-            board[row].append(0)
-        else:
-            board[row].append(1)
-        flop = not flop
+class Tile(object):
+    '''Tile object representing individual board tile'''
+    def __init__(self, color, coord):
+        self.color = color
+        self.coord = coord
 
-print(board)
+class Board(object):
+    '''Board object representing chess game board'''
+    def __init__(self):
+        self.board = []
+
+        # Create the chess board
+        flop = False
+        rank = 0
+        for i in range(8):
+            self.board.append([])
+
+            flop = not flop
+            row = "A"
+
+            for col in range(8):
+                if flop:
+                    self.board[i].append(Tile(WHITE, row + str(8 - rank)))
+                else:
+                    self.board[i].append(Tile(BLACK, row + str(8 - rank)))
+
+                flop = not flop
+                # Increment row
+                row = chr(ord(row) + 1)
+
+            rank += 1
+
+    def at(self, coord):
+        for row in self.board:
+            for tile in row:
+                if tile.coord == coord:
+                    return tile
+    
+    def __getitem__(self, i):
+        return self.board[i]
+
+# New board
+board = Board()
 
 ### Pygame Init ###
 
@@ -65,9 +97,9 @@ while not done:
             # Change the x/y screen coordinates to board coordinates
             column = pos[0] // (WIDTH + MARGIN)
             row = pos[1] // (HEIGHT + MARGIN)
-            # Change color
-            # board[row][column] = 2
-            print("Click ", pos, "board coordinates: ", row, column)
+
+            if DEBUG:
+                print("Click ", pos, "board coordinates: ", row, column, "coord: ", board[row][column].coord)
  
     # Set the screen background
     screen.fill(BLACK)
@@ -75,15 +107,9 @@ while not done:
     # Draw the board
     for row in range(8):
         for column in range(8):
-
-            color = WHITE
-            if board[row][column] == 1:
-                color = BLACK
-            if board[row][column] == 2:
-                color = GREEN
             
             pygame.draw.rect(screen,
-                             color,
+                             board[row][column].color,
                              [(MARGIN + WIDTH) * column + MARGIN,
                               (MARGIN + HEIGHT) * row + MARGIN,
                               WIDTH,
