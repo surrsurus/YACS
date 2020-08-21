@@ -1,5 +1,5 @@
 import pygame
- 
+import menu
 
 ### Board Init ###
 
@@ -39,6 +39,8 @@ pygame.init()
 # Set screen dimensions
 WINDOW_SIZE = [WIDTH * 8 + (MARGIN * 8), HEIGHT * 8 + (MARGIN * 8)]
 screen = pygame.display.set_mode(WINDOW_SIZE)
+MenuManager.setWindowSize()
+
  
 # Set title
 pygame.display.set_caption("YACS - Yet Another Chess Simulator")
