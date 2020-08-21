@@ -1,9 +1,6 @@
 import pygame
-<<<<<<< HEAD
-import menu
-=======
+from menu import MenuManager
 from enum import Enum
->>>>>>> master
 
 ### Game Globals ###
 
@@ -172,9 +169,9 @@ WHITE_PIECES = [
 pygame.init()
  
 # Set screen dimensions
-WINDOW_SIZE = [WIDTH * 8 + (MARGIN * 8), HEIGHT * 8 + (MARGIN * 8)]
+WINDOW_SIZE = [1000, 800]
 screen = pygame.display.set_mode(WINDOW_SIZE)
-MenuManager.setWindowSize()
+MenuManager.setWindowSize(WINDOW_SIZE)
 
  
 # Set title
@@ -191,36 +188,21 @@ done = False
 while not done:
 
     for event in pygame.event.get():
+
+        # Set the screen background
+        screen.fill(WHITE)
+        MenuManager.drawCurrent(screen)
+
         # Quit scenario
         if event.type == pygame.QUIT: 
             done = True
 
         # Clicked a tile scenario
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONUP:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
-            # Change the x/y screen coordinates to board coordinates
-            column = pos[0] // (WIDTH + MARGIN)
-            row = pos[1] // (HEIGHT + MARGIN)
+            MenuManager.handleClick(pos)
 
-            if DEBUG:
-                print("Click ", pos, "board coordinates: ", row, column, "coord: ", board[row][column].coord)
- 
-    # Set the screen background
-    screen.fill(BLACK)
- 
-    # Draw the board
-    board.draw(screen)
-
-    # Draw the pieces
-    for piece in WHITE_PIECES:
-        piece.draw(screen, board.coord_2_pos(piece.coord))
-
-    for piece in BLACK_PIECES:
-        piece.draw(screen, board.coord_2_pos(piece.coord))
-
-    # Take turn
- 
     # FPS Limiter
     clock.tick(60)
  

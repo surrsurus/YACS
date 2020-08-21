@@ -1,3 +1,4 @@
+import pygame
 
 class MenuManager():
 
@@ -29,8 +30,12 @@ class MenuManager():
         MenuManager.CURRENT = menu
     
     @staticmethod
-    def renderCurrent(screen):
-        MenuManager.CURRENT.render(screen)
+    def drawCurrent(screen):
+        MenuManager.CURRENT.draw(screen)
+
+    @staticmethod
+    def handleClick(location):
+        MenuManager.CURRENT.click(location)
     
 
 
@@ -41,37 +46,50 @@ class Menu():
     
     def click(self, location):
         buttons = filter(lambda x: isinstance(x, Button), self.elements)
-        clicked = filter(lambda x: x.hasBeenClicked(location))
-        if clicked: clicked[0].onClick()
+        clicked = filter(lambda x: x.hasBeenClicked(location), buttons)
+        result  = list(clicked)
+        if result: result[0].onClick()
     
-    def render(self, screen):
+    def draw(self, screen):
         for element in self.elements:
-            element.render(screen)
+            element.draw(screen)
 
 
 
 class Button():
 
-    def __init__(self, location, size, onClick):
-        self.location = location
+    COLOR = pygame.Color(230, 230, 230)
+
+    def __init__(self, text, relativeLocation, size, onClick):
+        pygame.font.init()
+        self.relativeLocation = relativeLocation
+        self.exactLocation = None
         self.size = size
         self.onClick = onClick
+        self.rect = pygame.Rect((0,0), self.size)
+        self.font = pygame.font.SysFont('Arial', 25)
+        self.text = text
     
     def hasBeenClicked(self, location):
-        return (location[0] > self.location - self.size[0] // 2 and
-                location[0] < self.location + self.size[0] // 2 and
-                location[1] > self.location - self.size[1] // 2 and
-                location[1] < self.location + self.size[1] // 2)
+        return self.rect.collidepoint(location)
     
-    def render(self, screen):
-        
+    def draw(self, screen):
+        self.exactLocation = (screen.get_width()  * self.relativeLocation[0] // 100, 
+                              screen.get_height() * self.relativeLocation[1] // 100)
+        self.rect.center = self.exactLocation
+        pygame.draw.rect(screen, Button.COLOR, self.rect)
+        text = self.font.render(self.text, True, (0,0,0))
+        text_rect = text.get_rect(center = self.rect.center)
+        screen.blit(text, text_rect)
 
 
 
 
 ELEMENT_LAYOUTS = {
     0: [
-        Button((), (), lambda MenuManager.goto(MENU_GAME))
-        Button((), (), lambda MenuManager.goto(MENU_SETTINGS))
-    ]
+        Button("test1", (50, 50), (200, 50), lambda: MenuManager.goto(MenuManager.MENU_GAME))
+    ],
+    1: [],
+    2: [],
+    3: [Button("test2", (50, 50), (200, 50), lambda: MenuManager.goto(MenuManager.MENU_MAIN))],
 }
