@@ -80,8 +80,8 @@ class Piece:
     def setColor(self, color):
         self.color.setColor(color)
 
-    def getColor(self) -> Color:
-        return self.color
+    def getColor(self):
+        return self.color.getColor()
 
     def getActive(self):
         return self.active
@@ -101,6 +101,11 @@ class Piece:
 
 class ChessBoard:
     def __init__(self):
+        self.tiles = []
+        self.whitePieces = []
+        self.blackPieces = []
+
+    def setStartBoard(self):
         self.tiles = []
         self.whitePieces = []
         self.blackPieces = []
@@ -131,11 +136,35 @@ class ChessBoard:
         for i in [3, 4, 5, 6]:
             emptyrow = []
             for letter in ["A", "B", "C", "D", "E", "F", "G", "H"]:
-                emptyrow.append(Piece(i, letter, False, PieceType.empty, False))
+                emptyrow.append(Piece(0, "", False, PieceType.empty, False))
             self.tiles.append(emptyrow)
 
         self.tiles.append(self.blackPieces[8:16])
         self.tiles.append(self.blackPieces[0:8])
+
+    def setBoard(self, tiles):
+        self.whitePieces = []
+        self.blackPieces = []
+        for row in tiles:
+            for piece in row:
+                if piece.gettype() != PieceType.empty and piece.getColor():
+                    self.whitePieces.append(piece)
+                elif piece.gettype() != PieceType.empty:
+                    self.blackPieces.append(piece)
+
+        self.tiles = tiles
+
+    def setEmptyBoard(self):
+        tiles = []
+
+        for i in range(8):
+            emptyrow = []
+            for j in range(8):
+                emptyrow.append(Piece(0, "", False, PieceType.empty, False))
+            tiles.append(emptyrow)
+        self.tiles = tiles
+        self.whitePieces = []
+        self.blackPieces = []
 
     def getstate(self):
         logic = ChessLogic()
@@ -147,6 +176,14 @@ class ChessBoard:
     def getBlackPieces(self):
         return self.blackPieces
 
+    def addpiece(self, piece):
+        if piece.getColor():
+            self.whitePieces.append(piece)
+        else:
+            self.blackPieces.append(piece)
+        piece_pos = piece.getpos().getPosAsPair()
+        self.setpos(piece_pos[0], piece_pos[1], piece)
+
     def getpos(self, posx, posy):
         try:
             piece = self.tiles[posy - 1][posx - 1]
@@ -157,9 +194,6 @@ class ChessBoard:
     def setpos(self, posx, posy, piece: Piece):
         self.tiles[posy - 1][posx - 1] = piece
 
-    def settiles(self, tiles):
-        tiles = tiles
-
     def print(self, color=True):
         playerorder = self.tiles.copy()
         if color:
@@ -169,7 +203,7 @@ class ChessBoard:
                 if item is None:
                     print("none,", end="")
                 else:
-                    if item.getColor().getColor():
+                    if item.getColor():
                         print("w", end="")
                     else:
                         print("b", end="")
@@ -199,7 +233,7 @@ class ChessLogic:
         if piece is None:
             return False
 
-        color = piece.getColor().getColor()
+        color = piece.getColor()
         piece_type = piece.gettype()
 
         if piece_type == PieceType.empty:
@@ -210,7 +244,7 @@ class ChessLogic:
 
         # if piece at end is same color
         if board.getpos(endPos[0], endPos[1]).gettype() != PieceType.empty \
-                and board.getpos(endPos[0], endPos[1]).getColor().getColor() == piece.getColor().getColor():
+                and board.getpos(endPos[0], endPos[1]).getColor() == piece.getColor():
             return False
 
         method_dict = {1: self.getValidPawnMoves,
@@ -234,36 +268,77 @@ class ChessLogic:
             for j in range(len(row)):
                 item = row[j]
                 if item.gettype() != PieceType.empty and item.gettype() != PieceType.king:
-                    if item.getColor().getColor != color:
+                    if item.getColor() != color:
                         logic = ChessLogic()
                         if logic.validateMove((j + 1, i + 1), king_pos, board, False):
                             return True
 
-    def sim_move(self, startpos, endpos, board):
-        newboard = copy.deepcopy(board)
-        piece = newboard.getpos(startpos[0], startpos[1])
+    def move(self, piece, endpos, board):
+        letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        startpos = piece.getpos().getPosAsPair()
 
+        piece.setpos(Pos(endpos[1], letters[endpos[0] - 1]))
+        board.setpos(endpos[0], endpos[1], piece)
+        board.setpos(startpos[0], startpos[1], Piece(0, "", False, PieceType.empty, False))
+
+    def remove(self, taken_piece, board):
+        taken_piece.setActive(False)
+        if taken_piece.gettype() != PieceType.empty:
+            taken_pos = taken_piece.getpos().getPosAsPair()
+            board.setpos(taken_pos[0], taken_pos[1], Piece(0, "", False, PieceType.empty, False))
+
+    def move_side_effects(self, piece, endpos, board):
         if piece.gettype() == PieceType.king or piece.gettype() == PieceType.rook:
             piece.setCanCastle(False)
+        if piece.gettype() == PieceType.pawn and endpos[1] in [1, 8]:
+            piece.settype(PieceType.queen)
+        self.untrigger_en_passant(board, piece.getColor())
 
-        taken_piece = newboard.getpos(endpos[0], endpos[1])
-        pivot_pos = taken_piece.getpos()
-        taken_piece.setpos(piece.getpos())
-        taken_piece.settype(PieceType.empty)
-        taken_piece.setActive(False)
-        piece.setpos(pivot_pos)
-        newboard.setpos(endpos[0], endpos[1], piece)
-        newboard.setpos(startpos[0], startpos[1], taken_piece)
-        return newboard
-
-    def untriggerEnPassant(self, board, color):
+    def untrigger_en_passant(self, board, color):
         if color:
-            pieces = board.getWhitePieces()
-        else:
             pieces = board.getBlackPieces()
+        else:
+            pieces = board.getWhitePieces()
         for piece in pieces:
             if piece.gettype() == PieceType.pawn:
                 piece.setEnPassant(False)
+
+    def handle_special_moves(self, piece, endpos, board):
+        if len(endpos) <= 2:
+            return
+        if endpos[2] == SpecialMove.king_castle:
+            rook = board.getpos(8, piece.getpos().getPosAsPair()[1])
+            self.move(rook, (6, piece.getpos().getPosAsPair()[1]), board)
+
+        if endpos[2] == SpecialMove.queen_castle:
+            rook = board.getpos(1, piece.getpos().getPosAsPair()[1])
+            self.move(rook, (4, piece.getpos().getPosAsPair()[1]), board)
+            pass
+
+        if endpos[2] == SpecialMove.en_passant_trigger:
+            king_side_piece = board.getpos(endpos[0] + 1, endpos[1])
+            queen_side_piece = board.getpos(endpos[0] - 1, endpos[1])
+            for adj_piece in [king_side_piece, queen_side_piece]:
+                if adj_piece is not None and adj_piece.gettype() == PieceType.pawn:
+                    piece.setEnPassant(True)
+            pass
+
+        if endpos[2] == SpecialMove.en_passant:
+            taken_piece = board.getpos(endpos[0], piece.getpos().getPosAsPair()[1])
+            self.remove(taken_piece, board)
+
+    def sim_move(self, startpos, endpos, board):
+        newboard = copy.deepcopy(board)
+
+        piece = newboard.getpos(startpos[0], startpos[1])
+        taken_piece = newboard.getpos(endpos[0], endpos[1])
+
+        self.move_side_effects(piece, taken_piece, newboard)
+        self.handle_special_moves(piece, endpos, newboard)
+        self.remove(taken_piece, newboard)
+        self.move(piece, endpos, newboard)
+
+        return newboard
 
     def findking(self, color, board):
         for i in range(len(board.tiles)):
@@ -271,11 +346,11 @@ class ChessLogic:
             for j in range(len(row)):
                 item = row[j]
                 if item.gettype() == PieceType.king:
-                    if item.getColor().getColor() == color:
+                    if item.getColor() == color:
                         return j + 1, i + 1
 
     def getValidPawnMoves(self, startpos, board):
-        color = board.getpos(startpos[0], startpos[1]).getColor().getColor()
+        color = board.getpos(startpos[0], startpos[1]).getColor()
         if color:
             direction = 1
         else:
@@ -285,7 +360,7 @@ class ChessLogic:
                 and board.getpos(startpos[0], startpos[1] + 1 * direction).gettype() == PieceType.empty:
             moves.append((startpos, (startpos[0], startpos[1] + 1 * direction)))
 
-        if ((color and startpos[0] == 2) or (not color and startpos == 7)) \
+        if ((color and startpos[1] == 2) or (not color and startpos[1] == 7)) \
                 and board.getpos(startpos[0], startpos[1] + 2 * direction) is not None \
                 and board.getpos(startpos[0], startpos[1] + 1 * direction).gettype() == PieceType.empty \
                 and board.getpos(startpos[0], startpos[1] + 2 * direction).gettype() == PieceType.empty:
@@ -301,12 +376,12 @@ class ChessLogic:
 
         if board.getpos(startpos[0] + 1, startpos[1] + 1 * direction) is not None \
                 and board.getpos(startpos[0] + 1, startpos[1] + 1 * direction).gettype() != PieceType.empty \
-                and board.getpos(startpos[0] + 1, startpos[1] + 1 * direction).getColor().getColor() != color:
+                and board.getpos(startpos[0] + 1, startpos[1] + 1 * direction).getColor() != color:
             moves.append((startpos, (startpos[0] + 1, startpos[1] + 1 * direction)))
 
         if board.getpos(startpos[0] - 1, startpos[1] + 1 * direction) is not None \
                 and board.getpos(startpos[0] - 1, startpos[1] + 1 * direction).gettype() != PieceType.empty \
-                and board.getpos(startpos[0] - 1, startpos[1] + 1 * direction).getColor().getColor() != color:
+                and board.getpos(startpos[0] - 1, startpos[1] + 1 * direction).getColor() != color:
             moves.append((startpos, (startpos[0] - 1, startpos[1] + 1 * direction)))
 
         moves.extend(self.getEnPassant(startpos, color, direction, board))
@@ -314,20 +389,20 @@ class ChessLogic:
         return moves
 
     def canEnPassantTrigger(self, piece, color):
-        return piece is not None and piece.gettype() == PieceType.pawn and piece.getColor().getColor() != color
+        return piece is not None and piece.gettype() == PieceType.pawn and piece.getColor() != color
 
     def getEnPassant(self, startpos, color, direction, board):
         moves = []
 
         if board.getpos(startpos[0] - 1, startpos[1] + 1 * direction) is not None \
                 and board.getpos(startpos[0] - 1, startpos[1] + 1 * direction).gettype() == PieceType.empty \
-                and board.getpos(startpos[0] - 1, startpos[1]).getColor().getColor() != color \
+                and board.getpos(startpos[0] - 1, startpos[1]).getColor() != color \
                 and board.getpos(startpos[0] - 1, startpos[1]).getEnPassant():
             moves.append((startpos, (startpos[0] - 1, startpos[1] + 1 * direction, SpecialMove.en_passant)))
 
         if board.getpos(startpos[0] + 1, startpos[1] + 1 * direction) is not None \
                 and board.getpos(startpos[0] + 1, startpos[1] + 1 * direction).gettype() == PieceType.empty \
-                and board.getpos(startpos[0] + 1, startpos[1]).getColor().getColor() != color \
+                and board.getpos(startpos[0] + 1, startpos[1]).getColor() != color \
                 and board.getpos(startpos[0] + 1, startpos[1]).getEnPassant():
             moves.append((startpos, (startpos[0] + 1, startpos[1] + 1 * direction, SpecialMove.en_passant)))
 
@@ -336,7 +411,7 @@ class ChessLogic:
     def getValidKingMoves(self, startpos, board):
         moves = []
         l = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
-        color = board.getpos(startpos[0], startpos[1]).getColor().getColor()
+        color = board.getpos(startpos[0], startpos[1]).getColor()
         for pair in l:
             if self.isEnemyOrEmpty(color, (startpos[0] + pair[0], startpos[1] + pair[1]), board):
                 moves.append((startpos, (startpos[0] + pair[0], startpos[1] + pair[1])))
@@ -384,7 +459,7 @@ class ChessLogic:
     def getValidKnightMoves(self, startpos, board):
         moves = []
         l = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
-        color = board.getpos(startpos[0], startpos[1]).getColor().getColor()
+        color = board.getpos(startpos[0], startpos[1]).getColor()
         for pair in l:
             if self.isEnemyOrEmpty(color, (startpos[0] + pair[0], startpos[1] + pair[1]), board):
                 moves.append((startpos, (startpos[0] + pair[0], startpos[1] + pair[1])))
@@ -395,12 +470,12 @@ class ChessLogic:
             return False
         if board.getpos(endpos[0], endpos[1]).gettype() == PieceType.empty:
             return True
-        if board.getpos(endpos[0], endpos[1]).getColor().getColor() != color:
+        if board.getpos(endpos[0], endpos[1]).getColor() != color:
             return True
         return False
 
     def getValidRookMoves(self, startpos, board):
-        color = board.getpos(startpos[0], startpos[1]).getColor().getColor()
+        color = board.getpos(startpos[0], startpos[1]).getColor()
         moves = []
         moves.extend(self.iterateMoves(board, color, startpos, 1, 0))
         moves.extend(self.iterateMoves(board, color, startpos, -1, 0))
@@ -409,7 +484,7 @@ class ChessLogic:
         return moves
 
     def getValidBishopMoves(self, startpos, board):
-        color = board.getpos(startpos[0], startpos[1]).getColor().getColor()
+        color = board.getpos(startpos[0], startpos[1]).getColor()
         moves = []
         moves.extend(self.iterateMoves(board, color, startpos, 1, 1))
         moves.extend(self.iterateMoves(board, color, startpos, -1, 1))
@@ -431,7 +506,7 @@ class ChessLogic:
         while board.getpos(i, j) is not None:
             piece = board.getpos(i, j)
             if piece.gettype() != PieceType.empty:
-                if piece.getColor().getColor() != color:
+                if piece.getColor() != color:
                     moves.append((startpos, (i, j)))
                 break
             moves.append((startpos, (i, j)))
@@ -481,8 +556,9 @@ class ChessLogic:
         return ChessState.inProgress
 
 
-class Game:
+class Chess:
     board = ChessBoard()
+    board.setStartBoard()
     logic = ChessLogic()
     color = True
 
@@ -490,7 +566,7 @@ class Game:
         piece = self.board.getpos(startpos[0], startpos[1])
         if piece is None:
             return False
-        if piece.gettype() == PieceType.empty or self.color != piece.getColor().getColor():
+        if piece.gettype() == PieceType.empty or self.color != piece.getColor():
             return False
         move_result = self.logic.validateMove(startpos, endpos, self.board)
         if move_result:
@@ -498,30 +574,28 @@ class Game:
             self.color = not self.color
             return True
         return False
-
     def print(self):
         self.board.print()
 
+# game = Chess()
 
-game = Game()
+# while True:
+#    if game.color:
+#        print("White")
 
-while True:
-    if game.color:
-        print("White")
+#    else:
+#        print("Black")
 
-    else:
-        print("Black")
+#    print(game.board.getstate().name)
 
-    print(game.board.getstate().name)
+#    game.print()
+#    print()
 
-    game.print()
-    print()
+#    start = input()
+#    start_point = (int(start.split(",")[0]), int(start.split(",")[1]))
 
-    start = input()
-    start_point = (int(start.split(",")[0]), int(start.split(",")[1]))
+#    end = input()
+#    end_point = (int(end.split(",")[0]), int(end.split(",")[1]))
 
-    end = input()
-    end_point = (int(end.split(",")[0]), int(end.split(",")[1]))
-
-    print("move from " + start + " to " + end)
-    print(game.make_move(start_point, end_point))
+#    print("move from " + start + " to " + end)
+#    print(game.make_move(start_point, end_point))
