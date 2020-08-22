@@ -60,7 +60,7 @@ class Piece:
         self.pieceType = pieceType
         self.color = Color(color)
         self.en_passant = False
-        self.can_castle = True
+        self.has_not_moved = True
 
     def setpos(self, pos):
         self.pos = pos
@@ -92,11 +92,11 @@ class Piece:
     def setEnPassant(self, en_passant):
         self.en_passant = en_passant
 
-    def getCanCastle(self):
-        return self.can_castle
+    def getHasNotMoved(self):
+        return self.has_not_moved
 
-    def setCanCastle(self, can_castle):
-        self.can_castle = can_castle
+    def setHasNotMoved(self, can_castle):
+        self.has_not_moved = can_castle
 
 
 class ChessBoard:
@@ -166,9 +166,9 @@ class ChessBoard:
         self.whitePieces = []
         self.blackPieces = []
 
-    def getstate(self):
+    def getstate(self, color):
         logic = ChessLogic()
-        return logic.checkState(self)
+        return logic.checkState(self, color)
 
     def getWhitePieces(self):
         return self.whitePieces
@@ -184,10 +184,17 @@ class ChessBoard:
         piece_pos = piece.getpos().getPosAsPair()
         self.setpos(piece_pos[0], piece_pos[1], piece)
 
+    def addpieces(self, *pieces):
+        for piece in pieces:
+            self.addpiece(piece)
+
+    def inBoardBounds(self, posx, posy):
+        return not (posx >= 9 or posx <= 0 or posy >= 9 or posy <= 0)
+
     def getpos(self, posx, posy):
-        try:
+        if self.inBoardBounds(posx, posy):
             piece = self.tiles[posy - 1][posx - 1]
-        except IndexError:
+        else:
             return None
         return piece
 
@@ -288,8 +295,8 @@ class ChessLogic:
             board.setpos(taken_pos[0], taken_pos[1], Piece(0, "", False, PieceType.empty, False))
 
     def move_side_effects(self, piece, endpos, board):
-        if piece.gettype() == PieceType.king or piece.gettype() == PieceType.rook:
-            piece.setCanCastle(False)
+
+        piece.setHasNotMoved(False)
         if piece.gettype() == PieceType.pawn and endpos[1] in [1, 8]:
             piece.settype(PieceType.queen)
         self.untrigger_en_passant(board, piece.getColor())
@@ -333,7 +340,7 @@ class ChessLogic:
         piece = newboard.getpos(startpos[0], startpos[1])
         taken_piece = newboard.getpos(endpos[0], endpos[1])
 
-        self.move_side_effects(piece, taken_piece, newboard)
+        self.move_side_effects(piece, endpos, newboard)
         self.handle_special_moves(piece, endpos, newboard)
         self.remove(taken_piece, newboard)
         self.move(piece, endpos, newboard)
@@ -350,7 +357,8 @@ class ChessLogic:
                         return j + 1, i + 1
 
     def getValidPawnMoves(self, startpos, board):
-        color = board.getpos(startpos[0], startpos[1]).getColor()
+        piece = board.getpos(startpos[0], startpos[1])
+        color = piece.getColor()
         if color:
             direction = 1
         else:
@@ -410,9 +418,9 @@ class ChessLogic:
 
     def getValidKingMoves(self, startpos, board):
         moves = []
-        l = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
+        king_pairs = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, -1), (-1, 1), (1, -1)]
         color = board.getpos(startpos[0], startpos[1]).getColor()
-        for pair in l:
+        for pair in king_pairs:
             if self.isEnemyOrEmpty(color, (startpos[0] + pair[0], startpos[1] + pair[1]), board):
                 moves.append((startpos, (startpos[0] + pair[0], startpos[1] + pair[1])))
         if self.canCastleKingSide(startpos, color, board):
@@ -427,9 +435,9 @@ class ChessLogic:
             return False
         rook = board.getpos(8, startpos[1])
         king = board.getpos(startpos[0], startpos[1])
-        if rook is None or king is None:
+        if rook is None or king is None or rook.gettype() != PieceType.rook or king.gettype() != PieceType.king:
             return False
-        if not rook.getCanCastle() or not king.getCanCastle():
+        if not rook.getHasNotMoved() or not king.getHasNotMoved():
             return False
         if not board.getpos(7, startpos[1]).gettype() == PieceType.empty \
                 and board.getpos(6, startpos[1]) == PieceType.empty:
@@ -444,9 +452,9 @@ class ChessLogic:
             return False
         rook = board.getpos(1, startpos[1])
         king = board.getpos(startpos[0], startpos[1])
-        if rook is None or king is None:
+        if rook is None or king is None or rook.gettype() != PieceType.rook or king.gettype() != PieceType.king:
             return False
-        if not rook.getCanCastle() or not king.getCanCastle():
+        if not rook.getHasNotMoved() or not king.getHasNotMoved():
             return False
         if not board.getpos(4, startpos[1]).gettype() == PieceType.empty \
                 and board.getpos(3, startpos[1]) == PieceType.empty:
@@ -458,9 +466,9 @@ class ChessLogic:
 
     def getValidKnightMoves(self, startpos, board):
         moves = []
-        l = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
+        knight_pairs = [(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (1, -2), (-1, 2), (-1, -2)]
         color = board.getpos(startpos[0], startpos[1]).getColor()
-        for pair in l:
+        for pair in knight_pairs:
             if self.isEnemyOrEmpty(color, (startpos[0] + pair[0], startpos[1] + pair[1]), board):
                 moves.append((startpos, (startpos[0] + pair[0], startpos[1] + pair[1])))
         return moves
@@ -477,19 +485,17 @@ class ChessLogic:
     def getValidRookMoves(self, startpos, board):
         color = board.getpos(startpos[0], startpos[1]).getColor()
         moves = []
-        moves.extend(self.iterateMoves(board, color, startpos, 1, 0))
-        moves.extend(self.iterateMoves(board, color, startpos, -1, 0))
-        moves.extend(self.iterateMoves(board, color, startpos, 0, 1))
-        moves.extend(self.iterateMoves(board, color, startpos, 1, -1))
+        rook_pairs = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        for pair in rook_pairs:
+            moves.extend(self.iterateMoves(board, color, startpos, pair[0], pair[1]))
         return moves
 
     def getValidBishopMoves(self, startpos, board):
         color = board.getpos(startpos[0], startpos[1]).getColor()
         moves = []
-        moves.extend(self.iterateMoves(board, color, startpos, 1, 1))
-        moves.extend(self.iterateMoves(board, color, startpos, -1, 1))
-        moves.extend(self.iterateMoves(board, color, startpos, 1, -1))
-        moves.extend(self.iterateMoves(board, color, startpos, -1, -1))
+        bishop_pairs = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
+        for pair in bishop_pairs:
+            moves.extend(self.iterateMoves(board, color, startpos, pair[0], pair[1]))
         return moves
 
     def getValidQueenMoves(self, startpos, board):
@@ -538,7 +544,7 @@ class ChessLogic:
                     return True
         return False
 
-    def checkState(self, board):
+    def checkState(self, board, color):
         white_has_moves = self.getAnyMoves(True, board)
         black_has_moves = self.getAnyMoves(False, board)
         if self.inCheck(True, board):
@@ -551,31 +557,30 @@ class ChessLogic:
                 return ChessState.blackChecked
             else:
                 return ChessState.blackCheckmated
-        if not white_has_moves and not black_has_moves:
+        if (not white_has_moves and color) or (not black_has_moves and not color):
             return ChessState.draw
         return ChessState.inProgress
 
+# class Chess:
+#    board = ChessBoard()
+#    board.setStartBoard()
+#    logic = ChessLogic()
+#    color = True
 
-class Chess:
-    board = ChessBoard()
-    board.setStartBoard()
-    logic = ChessLogic()
-    color = True
-
-    def make_move(self, startpos, endpos):
-        piece = self.board.getpos(startpos[0], startpos[1])
-        if piece is None:
-            return False
-        if piece.gettype() == PieceType.empty or self.color != piece.getColor():
-            return False
-        move_result = self.logic.validateMove(startpos, endpos, self.board)
-        if move_result:
-            self.board = move_result
-            self.color = not self.color
-            return True
-        return False
-    def print(self):
-        self.board.print()
+#    def make_move(self, startpos, endpos):
+#        piece = self.board.getpos(startpos[0], startpos[1])
+#        if piece is None:
+#            return False
+#        if piece.gettype() == PieceType.empty or self.color != piece.getColor():
+#            return False
+#        move_result = self.logic.validateMove(startpos, endpos, self.board)
+#        if move_result:
+#            self.board = move_result
+#            self.color = not self.color
+#            return True
+#        return False
+#    def print(self):
+#        self.board.print()
 
 # game = Chess()
 
