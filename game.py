@@ -14,6 +14,7 @@ MARGIN = 1
 
 # Color tuples
 BLACK = (0, 0, 0)
+GRAY = (125, 125, 125)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
@@ -46,7 +47,7 @@ class Board(object):
                 if flop:
                     self.board[i].append(Tile(WHITE, row + str(8 - rank)))
                 else:
-                    self.board[i].append(Tile(BLACK, row + str(8 - rank)))
+                    self.board[i].append(Tile(GRAY, row + str(8 - rank)))
 
                 flop = not flop
                 # Increment row
@@ -87,19 +88,19 @@ board = Board()
 
 ### Pieces Init ###
 
-b_pawn_img = pygame.image.load('./assets/chesspieces/black/png/black_pawn.png')
-b_rook_img = pygame.image.load('./assets/chesspieces/black/png/black_rook.png')
-b_knight_img = pygame.image.load('./assets/chesspieces/black/png/black_knight.png')
-b_bishop_img = pygame.image.load('./assets/chesspieces/black/png/black_bishop.png')
-b_queen_img = pygame.image.load('./assets/chesspieces/black/png/black_queen.png')
-b_king_img = pygame.image.load('./assets/chesspieces/black/png/black_king.png')
+b_pawn_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_pawn.png')
+b_rook_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_rook.png')
+b_knight_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_knight.png')
+b_bishop_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_bishop.png')
+b_queen_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_queen.png')
+b_king_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_king.png')
 
-w_pawn_img = pygame.image.load('./assets/chesspieces/white/png/white_pawn.png')
-w_rook_img = pygame.image.load('./assets/chesspieces/white/png/white_rook.png')
-w_knight_img = pygame.image.load('./assets/chesspieces/white/png/white_knight.png')
-w_bishop_img = pygame.image.load('./assets/chesspieces/white/png/white_bishop.png')
-w_queen_img = pygame.image.load('./assets/chesspieces/white/png/white_queen.png')
-w_king_img = pygame.image.load('./assets/chesspieces/white/png/white_king.png')
+w_pawn_img = pygame.image.load('./assets/chesspieces/white/small - 40x40/white_pawn.png')
+w_rook_img = pygame.image.load('./assets/chesspieces/white/small - 40x40/white_rook.png')
+w_knight_img = pygame.image.load('./assets/chesspieces/white/small - 40x40/white_knight.png')
+w_bishop_img = pygame.image.load('./assets/chesspieces/white/small - 40x40/white_bishop.png')
+w_queen_img = pygame.image.load('./assets/chesspieces/white/small - 40x40/white_queen.png')
+w_king_img = pygame.image.load('./assets/chesspieces/white/small - 40x40/white_king.png')
 
 class PieceColor(Enum):
     BLACK = 0
@@ -244,7 +245,7 @@ while not done:
                 last_clicked.active_color = RED
 
     # Set the screen background
-    screen.fill(BLACK)
+    screen.fill(WHITE)
  
     # Draw the board
     board.draw(screen)
