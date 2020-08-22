@@ -3,7 +3,7 @@ import util
 from enum import Enum
 
 # This sets the WIDTH and HEIGHT of each board tile
-WIDTH = 40
+WIDTH = 80
 HEIGHT = WIDTH
  
 # This sets the margin between each tile

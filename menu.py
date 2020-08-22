@@ -1,5 +1,8 @@
 import pygame
 import board
+import util
+
+pygame.font.init()
 
 class MenuManager():
 
@@ -39,7 +42,6 @@ class MenuManager():
         MenuManager.CURRENT.click(location)
     
 
-
 class Menu():
 
     def __init__(self, windowSize, index):
@@ -56,19 +58,17 @@ class Menu():
             element.draw(screen)
 
 
-
 class Button():
 
     COLOR = pygame.Color(230, 230, 230)
 
-    def __init__(self, text, relativeLocation, size, onClick):
-        pygame.font.init()
+    def __init__(self, text, relativeLocation, onClick, size=(240, 100), font='Arial'):
         self.relativeLocation = relativeLocation
         self.exactLocation = None
         self.size = size
         self.onClick = onClick
         self.rect = pygame.Rect((0,0), self.size)
-        self.font = pygame.font.SysFont('Arial', 25)
+        self.font = pygame.font.SysFont(font, 40)
         self.text = text
     
     def hasBeenClicked(self, location):
@@ -84,13 +84,66 @@ class Button():
         screen.blit(text, text_rect)
 
 
+class ButtonWithIndicator(Button):
+
+    def __init__(self, text, relativeLocation, size=(240, 100), font='Arial'):
+        super().__init__(text, relativeLocation, self.onClick, size, font)
+        self.state = False
+        self.indicatorRect = pygame.Rect(0, 0, self.size[1], self.size[1])
+    
+    def draw(self, screen):
+        super().draw(screen)
+        indicatorLocation = ((screen.get_width()  * self.relativeLocation[0] // 100) + 180, 
+                              screen.get_height() * self.relativeLocation[1] // 100)
+        self.indicatorRect.center = indicatorLocation
+        if self.state:
+            pygame.draw.rect(screen, util.GRAY, self.indicatorRect)
+            text = self.font.render("ON", True, (0,0,0))
+            text_rect = text.get_rect(center = self.indicatorRect.center)
+            screen.blit(text, text_rect)
+        else:
+            pygame.draw.rect(screen, util.BLACK, self.indicatorRect)
+            text = self.font.render("OFF", True, (255,255,255))
+            text_rect = text.get_rect(center = self.indicatorRect.center)
+            screen.blit(text, text_rect)
+    
+    def onClick(self, pos):
+        self.state = not self.state
+
+
+class Text():
+     
+    COLOR = pygame.Color(0, 0, 0)
+
+    def __init__(self, text, relativeLocation, fontSize=25, font='Arial'):
+        self.text = text
+        self.relativeLocation = relativeLocation
+        self.font = pygame.font.SysFont(font, fontSize)
+
+    def draw(self, screen):
+        self.exactLocation = (screen.get_width()  * self.relativeLocation[0] // 100, 
+                              screen.get_height() * self.relativeLocation[1] // 100)
+        text = self.font.render(self.text, True, (0,0,0))
+        text_rect = text.get_rect(center = self.exactLocation)
+        screen.blit(text, text_rect)
+        
 
 
 ELEMENT_LAYOUTS = {
     0: [
-        Button("test1", (50, 50), (200, 50), lambda pos: MenuManager.goto(MenuManager.MENU_GAME))
+        Text("YACS", (50, 15), 100),
+        Text("Yet Another Chess Simulator", (50, 25), 40),
+        Button("Host Game", (50, 50), lambda pos: MenuManager.goto(MenuManager.MENU_GAME)),
+        Button("Join Game", (50, 65), lambda pos: MenuManager.goto(MenuManager.MENU_JOIN)),
+        Button("Settings", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_SETTINGS)),
     ],
-    1: [],
-    2: [],
-    3: [board.Board()],
+    1: [
+        ButtonWithIndicator("Setting1", (46, 30)),
+        Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
+    ],
+    2: [Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
+    3: [
+        board.Board(),
+        Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
+    ],
 }
