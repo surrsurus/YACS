@@ -1,4 +1,5 @@
 import pygame
+import board
 
 class MenuManager():
 
@@ -45,10 +46,10 @@ class Menu():
         self.elements = ELEMENT_LAYOUTS[index]
     
     def click(self, location):
-        buttons = filter(lambda x: isinstance(x, Button), self.elements)
-        clicked = filter(lambda x: x.hasBeenClicked(location), buttons)
+        clickables = filter(lambda x: isinstance(x, Button) or isinstance(x, board.Board), self.elements)
+        clicked = filter(lambda x: x.hasBeenClicked(location), clickables)
         result  = list(clicked)
-        if result: result[0].onClick()
+        if result: result[0].onClick(location)
     
     def draw(self, screen):
         for element in self.elements:
@@ -87,9 +88,9 @@ class Button():
 
 ELEMENT_LAYOUTS = {
     0: [
-        Button("test1", (50, 50), (200, 50), lambda: MenuManager.goto(MenuManager.MENU_GAME))
+        Button("test1", (50, 50), (200, 50), lambda pos: MenuManager.goto(MenuManager.MENU_GAME))
     ],
     1: [],
     2: [],
-    3: [Button("test2", (50, 50), (200, 50), lambda: MenuManager.goto(MenuManager.MENU_MAIN))],
+    3: [board.Board()],
 }
