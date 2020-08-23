@@ -44,8 +44,7 @@ class Board(object):
                 row = chr(ord(row) + 1)
 
             rank += 1
-        
-        self.current_clicked = None
+
         self.last_clicked = None
         self.rect = pygame.Rect(0, 0, WIDTH * 8, HEIGHT * 8)
 
@@ -86,45 +85,46 @@ class Board(object):
     def onClick(self, pos):
         column = pos[0] // (WIDTH + MARGIN)
         row = pos[1] // (HEIGHT + MARGIN)
-        self.current_clicked = board[row][column]
+        
+        current_clicked = self.board[row][column]
         if self.last_clicked != None:
             # We are now in a situation where the player has previously clicked a tile, and is clicking a new one
             
             # Clicked same tile twice in a row
-            if self.last_clicked.coord == self.current_clicked.coord:
+            if self.last_clicked.coord == current_clicked.coord:
                 # Case: Tile already highlighted, so this is a deselect
-                if self.current_clicked.active_color == util.RED:
+                if current_clicked.active_color == util.RED:
                     self.last_clicked.active_color = self.last_clicked.color
                     # Update last coord with nothing
                     self.last_clicked = None
                 # Case: Tile not highlighted, so highlight it
                 else:
-                    self.current_clicked.active_color = util.RED
+                    current_clicked.active_color = util.RED
             # Did not click same tile twice in a row
             else:
-                self.current_clicked.active_color = util.RED
+                current_clicked.active_color = util.RED
 
                 # Move piece on old tile to new tile if possible
                 for piece in WHITE_PIECES:
                     if piece.coord == self.last_clicked.coord and self.last_clicked.active_color == util.RED:
-                        piece.coord = self.current_clicked.coord
-                        self.current_clicked.active_color = self.current_clicked.color
+                        piece.coord = current_clicked.coord
+                        current_clicked.active_color = current_clicked.color
                         break
 
                 # Reset color of last clicked tile
                 self.last_clicked.active_color = self.last_clicked.color
 
                 # Update last coord with current coord
-                self.last_clicked = board.tile_at(self.current_clicked.coord)
+                self.last_clicked = self.tile_at(current_clicked.coord)
         else:
             # Needs to happen in this order otherwise game broke
-            self.last_clicked = board.tile_at(self.current_clicked.coord)
+            self.last_clicked = self.tile_at(current_clicked.coord)
             self.last_clicked.active_color = util.RED
             
 
         if self.last_clicked:
             print("Last clicked: ", self.last_clicked.coord)
-        print("Click ", pos, "board coordinates: ", row, column, "coord: ", self.current_clicked.coord)
+        print("Click ", pos, "board coordinates: ", row, column, "coord: ", current_clicked.coord)
         
     def hasBeenClicked(self, location):
         return self.rect.collidepoint(location)
