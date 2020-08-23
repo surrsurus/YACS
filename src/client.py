@@ -47,7 +47,7 @@ class Client:
 		self.soc.close()
 		print('[--------------------Disconnected-------------------]')
 
-IP_ADDRESS = 'localhost'
-PORT = 25565
-test = Client(IP_ADDRESS, PORT)
-test.connect()
+# IP_ADDRESS = 'localhost'
+# PORT = 25565
+# test = Client(IP_ADDRESS, PORT)
+# test.connect()

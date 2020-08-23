@@ -1,8 +1,8 @@
 import pygame
-from menu import MenuManager
-from client import Client
-from server import Server
-
+from src import menu
+from src import client
+from src import server
+import board
 import util
 
 ### Game Globals ###
@@ -17,7 +17,7 @@ pygame.init()
 # Set screen dimensions
 WINDOW_SIZE = [1000, 800]
 screen = pygame.display.set_mode(WINDOW_SIZE)
-MenuManager.setWindowSize(WINDOW_SIZE)
+menu.MenuManager.setWindowSize(WINDOW_SIZE)
 
 # Set title
 pygame.display.set_caption("YACS - Yet Another Chess Simulator")
@@ -28,6 +28,8 @@ clock = pygame.time.Clock()
 # Client objs go here
 server = None
 client = None
+board = board.Board()
+menu.updateBoardObj(board)
 
 # Loop until the user clicks the close button.
 done = False
@@ -45,13 +47,13 @@ while not done:
         elif event.type == pygame.MOUSEBUTTONUP:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
-            MenuManager.handleClick(pos)
+            menu.MenuManager.handleClick(pos)
 
     # Set the screen background
     screen.fill(util.WHITE)
-    MenuManager.drawCurrent(screen)
+    menu.MenuManager.drawCurrent(screen)
 
-    if MenuManager.CURRENT == MenuManager.GAME_SERVER:
+    if menu.MenuManager.CURRENT == menu.MenuManager.GAME_SERVER:
         # Server loop. 
         # If the above is true, the player who clicked "Host Game" is now on the game screen
         # Accept connection if needed, otherwise wait for host to take turn and then send it to client
@@ -59,8 +61,8 @@ while not done:
         # server.send(move)
         # thiermove = server.recieve()
         # board.move(thiermove)
-
-    elif MenuManager.CURRENT == MenuManager.GAME_CLIENT:
+        pass
+    elif menu.MenuManager.CURRENT == menu.MenuManager.GAME_CLIENT:
         # Client loop. 
         # If the above is true, the player who clicked "Join Game" is now on the game screen
         # Wait for player to take turn and then send it to server
@@ -68,6 +70,7 @@ while not done:
         # board.move(thiermove)
         # move = board.getValidMove()
         # server.send(move)
+        pass
  
     # FPS Limiter
     clock.tick(60)

@@ -29,6 +29,7 @@ class MenuManager():
         MenuManager.MENU_JOIN     = Menu(MenuManager.WINDOW_SIZE, 2)
         MenuManager.GAME_SERVER   = Menu(MenuManager.WINDOW_SIZE, 3)
         MenuManager.GAME_CLIENT   = Menu(MenuManager.WINDOW_SIZE, 4)
+        print(MenuManager.GAME_SERVER)
         MenuManager.CURRENT = MenuManager.MENU_MAIN
     
     @staticmethod
@@ -129,7 +130,9 @@ class Text():
         text_rect = text.get_rect(center = self.exactLocation)
         screen.blit(text, text_rect)
         
-
+def updateBoardObj(board):
+    ELEMENT_LAYOUTS[3][0] = board
+    ELEMENT_LAYOUTS[4][0] = board
 
 ELEMENT_LAYOUTS = {
     0: [
@@ -145,11 +148,11 @@ ELEMENT_LAYOUTS = {
     ],
     2: [Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
     3: [
-        board.Board(),
+        None,
         Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
     4: [
-        board.Board(),
+        None,
         Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)) 
     ]
 }

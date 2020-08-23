@@ -47,7 +47,7 @@ class Server:
 		self.connection.close()
 		print('[--------------------Disconnected-------------------]')
 
-IP_ADDRESS = 'localhost'
-PORT = 25565
-test = Server(IP_ADDRESS, PORT)
-test.startServer()
+# IP_ADDRESS = 'localhost'
+# PORT = 25565
+# test = Server(IP_ADDRESS, PORT)
+# test.startServer()
