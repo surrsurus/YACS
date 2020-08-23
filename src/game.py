@@ -3,7 +3,7 @@ from src import menu
 from src import client
 from src import server
 import board
-import util
+from src import util, chess
 
 ### Game Globals ###
 
@@ -15,7 +15,7 @@ DEBUG = True
 pygame.init()
  
 # Set screen dimensions
-WINDOW_SIZE = [1000, 800]
+WINDOW_SIZE = [1440, 900]
 screen = pygame.display.set_mode(WINDOW_SIZE)
 menu.MenuManager.setWindowSize(WINDOW_SIZE)
 
@@ -35,6 +35,8 @@ menu.updateBoardObj(board)
 done = False
 
 ### Game Loop ###
+game = chess.Chess()
+
 while not done:
 
     for event in pygame.event.get():
@@ -48,6 +50,7 @@ while not done:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
             menu.MenuManager.handleClick(pos)
+
 
     # Set the screen background
     screen.fill(util.WHITE)
