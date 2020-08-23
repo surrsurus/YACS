@@ -36,12 +36,13 @@ class Client:
 		# Upon chat termination, proceed to disconnect
 		self.disconnect()
 	
+	def send(self, thing):
+		self.soc.send(thing.encode())
+
+	def recieve(self):
+		return self.soc.recv(4096)
+
 	def disconnect(self):
 		'''Disconnect from server'''
 		self.soc.close()
 		print('[--------------------Disconnected-------------------]')
-
-IP_ADDRESS = 'localhost'
-PORT = 25565
-test = Client(IP_ADDRESS, PORT)
-test.connect()

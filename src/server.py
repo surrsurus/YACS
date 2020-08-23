@@ -35,13 +35,15 @@ class Server:
 				break
 		# Upon chat termination, proceed to disconnect
 		self.stopServer()
-	
+
+	def send(self, thing):
+		self.connection.send(thing)
+
+	def recieve(self):
+		return self.connection.recv(4096)
+
 	def stopServer(self):
 		'''Stop server'''
 		self.connection.close()
 		print('[--------------------Disconnected-------------------]')
 
-IP_ADDRESS = 'localhost'
-PORT = 25565
-test = Server(IP_ADDRESS, PORT)
-test.startServer()

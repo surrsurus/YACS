@@ -1,7 +1,9 @@
 import pygame
+import menu
 from menu import MenuManager
-
-import util
+import util, board
+from server import Server
+from client import Client
 
 ### Game Globals ###
 
@@ -24,6 +26,10 @@ pygame.display.set_caption("YACS - Yet Another Chess Simulator")
 clock = pygame.time.Clock()
  
 ### Game Loop ###
+board = board.Board()
+menu.updateBoards(board)
+serverNotInitialized = True
+clientNotInitialized = True
 
 # Loop until the user clicks the close button.
 done = False
@@ -45,6 +51,34 @@ while not done:
     # Set the screen background
     screen.fill(util.WHITE)
     MenuManager.drawCurrent(screen)
+
+    if MenuManager.CURRENT == MenuManager.GAME_SERVER:
+        # Server loop. 
+        # If the above is true, the player who clicked "Host Game" is now on the game screen
+        # Accept connection if needed, otherwise wait for host to take turn and then send it to client
+        if serverNotInitialized:
+            server = Server("localhost", "12345")
+        if board.getValidMoveHasHappened():
+            server.send(board)
+            # exit here on checkmate
+            board = server.recieve()
+
+    elif MenuManager.CURRENT == MenuManager.GAME_CLIENT:
+        # Client loop. 
+        # If the above is true, the player who clicked "Join Game" is now on the game screen
+        # Wait for player to take turn and then send it to server
+        if clientNotInitialized:
+            client = Client("localhost", "12345")
+        if firstTurn:
+            theirmove = client.recieve()
+            board.move(thiermove)
+            firstTurn = False
+        else:
+            if board.getValidMoveHasHappened():
+                move = board.getValidMove()
+                client.send(move)
+                # exit here on checkmate
+                board = client.recieve()
  
     # FPS Limiter
     clock.tick(60)

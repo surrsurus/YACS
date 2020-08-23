@@ -125,6 +125,7 @@ class Board(object):
 
         self.last_clicked = None
         self.rect = pygame.Rect(0, 0, WIDTH * 8, HEIGHT * 8)
+        self.validMoveHasHappened = False
 
     def draw(self, screen):
         '''Render board to screen, right now, board is the screen so no xy is passed'''
@@ -186,6 +187,7 @@ class Board(object):
 
                 if self.game.make_move(self.last_clicked.coord, current_clicked.coord):
                     self.updatePieces()
+                    self.validMoveHasHappened = True
                 current_clicked.active_color = current_clicked.color
 
                 # Reset color of last clicked tile
@@ -205,6 +207,11 @@ class Board(object):
 
     def hasBeenClicked(self, location):
         return self.rect.collidepoint(location)
+    
+    def getValidMoveHasHappened(self):
+        happened = self.validMoveHasHappened
+        self.validMoveHasHappened = False
+        return happened
 
     def updatePieces(self):
         pieces = self.game.printBoard()
