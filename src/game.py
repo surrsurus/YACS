@@ -1,7 +1,6 @@
 import pygame
-from menu import MenuManager
-
-import util
+from src.menu import MenuManager
+from src import util, chess
 
 ### Game Globals ###
 
@@ -28,6 +27,8 @@ clock = pygame.time.Clock()
 # Loop until the user clicks the close button.
 done = False
 
+game = chess.Chess()
+
 while not done:
 
     for event in pygame.event.get():
@@ -41,6 +42,7 @@ while not done:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
             MenuManager.handleClick(pos)
+
 
     # Set the screen background
     screen.fill(util.WHITE)
