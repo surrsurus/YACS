@@ -13,7 +13,7 @@ DEBUG = True
 pygame.init()
  
 # Set screen dimensions
-WINDOW_SIZE = [1000, 800]
+WINDOW_SIZE = [1440, 900]
 screen = pygame.display.set_mode(WINDOW_SIZE)
 MenuManager.setWindowSize(WINDOW_SIZE)
 
