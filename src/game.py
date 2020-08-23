@@ -29,7 +29,7 @@ clock = pygame.time.Clock()
 server = None
 client = None
 board = board.Board()
-menu.updateBoardObj(board)
+menu.updateBoardObjs(board)
 
 # Loop until the user clicks the close button.
 done = False

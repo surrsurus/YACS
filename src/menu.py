@@ -8,7 +8,8 @@ class MenuManager():
     MENU_MAIN     = None
     MENU_SETTINGS = None
     MENU_JOIN     = None
-    MENU_GAME     = None
+    GAME_CLIENT   = None
+    GAME_SERVER   = None
     CURRENT       = None
     
     def __init__(self):
@@ -24,7 +25,8 @@ class MenuManager():
         MenuManager.MENU_MAIN     = Menu(MenuManager.WINDOW_SIZE, 0)
         MenuManager.MENU_SETTINGS = Menu(MenuManager.WINDOW_SIZE, 1)
         MenuManager.MENU_JOIN     = Menu(MenuManager.WINDOW_SIZE, 2)
-        MenuManager.MENU_GAME     = Menu(MenuManager.WINDOW_SIZE, 3)
+        MenuManager.GAME_SERVER   = Menu(MenuManager.WINDOW_SIZE, 3)
+        MenuManager.GAME_CLIENT   = Menu(MenuManager.WINDOW_SIZE, 4)
         MenuManager.CURRENT = MenuManager.MENU_MAIN
     
     @staticmethod
@@ -84,14 +86,29 @@ class Button():
         text_rect = text.get_rect(center = self.rect.center)
         screen.blit(text, text_rect)
 
-
-
+def updateBoardObjs(board):
+    ELEMENT_LAYOUTS[3][0] = board
+    ELEMENT_LAYOUTS[4][0] = board
 
 ELEMENT_LAYOUTS = {
     0: [
-        Button("test1", (50, 50), (200, 50), lambda pos: MenuManager.goto(MenuManager.MENU_GAME))
+        Text("YACS", (50, 15), 100),
+        Text("Yet Another Chess Simulator", (50, 25), 40),
+        Button("Host Game", (50, 50), lambda pos: MenuManager.goto(MenuManager.GAME_SERVER)),
+        Button("Join Game", (50, 65), lambda pos: MenuManager.goto(MenuManager.MENU_JOIN)),
+        Button("Settings", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_SETTINGS)),
     ],
-    1: [],
-    2: [],
-    3: [board.Board()],
+    1: [
+        ButtonWithIndicator("Setting1", (46, 30)),
+        Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
+    ],
+    2: [Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
+    3: [
+        board.Board(),
+        Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
+    ],
+    4: [
+        board.Board(),
+        Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)) 
+    ]
 }
