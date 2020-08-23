@@ -598,6 +598,9 @@ class Chess:
     def chessToInts(self, chessPos):
         return Pos.colDict.get(chessPos[0]), int(chessPos[1])
 
+    def getState(self):
+        return self.logic.checkState(self.board, self.color)
+
     def printBoard(self):
         b = board.Board()
         color_dict = {True: board.PieceColor.WHITE, False: board.PieceColor.BLACK}
