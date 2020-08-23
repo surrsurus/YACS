@@ -132,6 +132,10 @@ class Board(object):
 # New board
 board = Board()
 
+# Set icon
+gameIcon = pygame.image.load('./assets/icon_whitebackground.png')
+pygame.display.set_icon(gameIcon)
+
 ### Pieces Init ###
 
 b_pawn_img = pygame.image.load('./assets/chesspieces/black/small - 40x40/black_pawn.png')
