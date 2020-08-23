@@ -36,6 +36,12 @@ class Client:
 		# Upon chat termination, proceed to disconnect
 		self.disconnect()
 	
+	def recieve(self):
+		return self.soc.recv(4096).decode()
+
+	def send(self, message):
+		self.soc.send(message.encode())
+
 	def disconnect(self):
 		'''Disconnect from server'''
 		self.soc.close()

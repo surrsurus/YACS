@@ -35,6 +35,12 @@ class Server:
 				break
 		# Upon chat termination, proceed to disconnect
 		self.stopServer()
+
+	def recieve(self):
+		return self.soc.recv(4096).decode()
+
+	def send(self, message):
+		self.soc.send(message.encode())
 	
 	def stopServer(self):
 		'''Stop server'''

@@ -1,5 +1,6 @@
 import pygame
 from menu import MenuManager
+from client import Client
 
 import util
 
@@ -22,12 +23,14 @@ pygame.display.set_caption("YACS - Yet Another Chess Simulator")
  
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
- 
-### Game Loop ###
+
+# Initialize server / client
+server = 
 
 # Loop until the user clicks the close button.
 done = False
 
+### Game Loop ###
 while not done:
 
     for event in pygame.event.get():
@@ -45,6 +48,24 @@ while not done:
     # Set the screen background
     screen.fill(util.WHITE)
     MenuManager.drawCurrent(screen)
+
+    if MenuManager.CURRENT == MenuManager.GAME_SERVER:
+        # Server loop. 
+        # If the above is true, the player who clicked "Host Game" is now on the game screen
+        # Accept connection if needed, otherwise wait for host to take turn and then send it to client
+        # move = board.getValidMove()
+        # server.send(move)
+        # thiermove = server.recieve()
+        # board.move(thiermove)
+
+    elif MenuManager.CURRENT == MenuManager.GAME_CLIENT:
+        # Client loop. 
+        # If the above is true, the player who clicked "Join Game" is now on the game screen
+        # Wait for player to take turn and then send it to server
+        # theirmove = client.recieve()
+        # board.move(thiermove)
+        # move = board.getValidMove()
+        # server.send(move)
  
     # FPS Limiter
     clock.tick(60)
