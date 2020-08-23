@@ -1,6 +1,7 @@
 import pygame
 from menu import MenuManager
 from client import Client
+from server import Server
 
 import util
 
@@ -24,8 +25,9 @@ pygame.display.set_caption("YACS - Yet Another Chess Simulator")
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-# Initialize server / client
-server = 
+# Client objs go here
+server = None
+client = None
 
 # Loop until the user clicks the close button.
 done = False
