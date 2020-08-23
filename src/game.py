@@ -30,6 +30,7 @@ board = board.Board()
 menu.updateBoards(board)
 serverNotInitialized = True
 clientNotInitialized = True
+firstTurn = True
 
 # Loop until the user clicks the close button.
 done = False
@@ -57,7 +58,9 @@ while not done:
         # If the above is true, the player who clicked "Host Game" is now on the game screen
         # Accept connection if needed, otherwise wait for host to take turn and then send it to client
         if serverNotInitialized:
-            server = Server("localhost", "12345")
+            server = Server("192.168.192.209", 25565)
+            server.startServer()
+            serverNotInitialized = False
         if board.getValidMoveHasHappened():
             server.send(board)
             # exit here on checkmate
@@ -68,7 +71,9 @@ while not done:
         # If the above is true, the player who clicked "Join Game" is now on the game screen
         # Wait for player to take turn and then send it to server
         if clientNotInitialized:
-            client = Client("localhost", "12345")
+            client = Client("192.168.192.209", 25565)
+            client.connect()
+            clientNotInitialized = False
         if firstTurn:
             theirmove = client.recieve()
             board.move(thiermove)
@@ -87,4 +92,6 @@ while not done:
     pygame.display.flip()
  
 # Program will hang on exit without this
+client.disconnect()
+server.stopServer()
 pygame.quit()
