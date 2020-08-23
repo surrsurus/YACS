@@ -194,7 +194,7 @@ class Board(object):
                 self.last_clicked.active_color = self.last_clicked.color
 
                 # Update last coord with current coord
-                self.last_clicked = self.tile_at(current_clicked.coord)
+                self.last_clicked = None
         else:
             # Needs to happen in this order otherwise game broke
             self.last_clicked = self.tile_at(current_clicked.coord)
