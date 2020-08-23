@@ -267,12 +267,18 @@ class ChessLogic:
                        4: self.getValidRookMoves,
                        5: self.getValidBishopMoves,
                        6: self.getValidKnightMoves}
-
-        if (startPos, endPos) in method_dict[piece_type.value](startPos, board):
-            simboard = self.sim_move(startPos, endPos, board)
+        move = self.move_in_list(startPos, endPos, method_dict[piece_type.value](startPos, board))
+        if move:
+            simboard = self.sim_move(move[0], move[1], board)
             if not check_for_check or not self.inCheck(color, simboard):
                 self.moveHistory.append((startPos, endPos, board))
                 return simboard
+        return False
+
+    def move_in_list(self, startpos, endpos, move_list):
+        for move in move_list:
+            if startpos == move[0] and endpos == (move[1][0], move[1][1]):
+                return move
         return False
 
     def inCheck(self, color, board: ChessBoard):
