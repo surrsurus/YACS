@@ -1,5 +1,5 @@
 from unittest import TestCase
-from src import chess
+import chess
 
 
 class TestChessLogic(TestCase):

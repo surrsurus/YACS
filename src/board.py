@@ -1,5 +1,7 @@
 import pygame
-from src import chess, util
+import chess
+import util
+
 from enum import Enum
 
 # This sets the WIDTH and HEIGHT of each board tile
