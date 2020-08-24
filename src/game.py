@@ -75,13 +75,13 @@ while not done:
             client.connect()
             clientNotInitialized = False
         if firstTurn:
-            theirmove = client.recieve()
-            board.move(thiermove)
+            # theirmove = client.recieve()
+            # board.move(theirmove)
             firstTurn = False
         else:
             if board.getValidMoveHasHappened():
                 move = board.getValidMove()
-                client.send(move)
+                client.send(board)
                 # exit here on checkmate
                 board = client.recieve()
  

@@ -1,5 +1,6 @@
 # import socket library
 import socket
+import pickle
 
 class Client:
 	'''Client object providing ability to connect and communicate with server via sockets'''
@@ -33,10 +34,10 @@ class Client:
 	# 		sentMessage = input('Enter a message or type \'goodbye\' to end the chat: ')
 	
 	def send(self, thing):
-		self.soc.send(thing.encode())
+		self.soc.send(pickle.dumps(thing))
 
 	def recieve(self):
-		return self.soc.recv(4096).decode()
+		return pickle.loads(self.soc.recv(4096))
 
 	def disconnect(self):
 		'''Disconnect from server'''
