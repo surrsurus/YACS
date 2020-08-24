@@ -74,6 +74,8 @@ while not done:
         # If the above is true, the player who clicked "Join Game" is now on the game screen
         # Wait for player to take turn and then send it to server
         if clientNotInitialized:
+            screen.fill(util.WHITE)
+            MenuManager.drawCurrent(screen)
             ip = menu.getIpFromTextBox()
             client = Client(ip, 25565)
             client.connect()
