@@ -1,5 +1,6 @@
 import copy
 import enum
+# import board
 
 
 class ChessState(enum.Enum):
@@ -40,6 +41,9 @@ class Pos:
     def getPosAsPair(self):
         return self.colDict.get(self.col), self.row
 
+    def getPosAsString(self):
+        return  self.col + str(self.row)
+
 
 class Color:
     # Black is false
@@ -67,6 +71,9 @@ class Piece:
 
     def getpos(self) -> ():
         return self.pos
+
+    def getPosAsString(self):
+        return self.pos.getPosAsString()
 
     def setActive(self, active):
         self.active = active
@@ -260,12 +267,18 @@ class ChessLogic:
                        4: self.getValidRookMoves,
                        5: self.getValidBishopMoves,
                        6: self.getValidKnightMoves}
-
-        if (startPos, endPos) in method_dict[piece_type.value](startPos, board):
-            simboard = self.sim_move(startPos, endPos, board)
+        move = self.move_in_list(startPos, endPos, method_dict[piece_type.value](startPos, board))
+        if move:
+            simboard = self.sim_move(move[0], move[1], board)
             if not check_for_check or not self.inCheck(color, simboard):
                 self.moveHistory.append((startPos, endPos, board))
                 return simboard
+        return False
+
+    def move_in_list(self, startpos, endpos, move_list):
+        for move in move_list:
+            if startpos == move[0] and endpos == (move[1][0], move[1][1]):
+                return move
         return False
 
     def inCheck(self, color, board: ChessBoard):
@@ -295,7 +308,6 @@ class ChessLogic:
             board.setpos(taken_pos[0], taken_pos[1], Piece(0, "", False, PieceType.empty, False))
 
     def move_side_effects(self, piece, endpos, board):
-
         piece.setHasNotMoved(False)
         if piece.gettype() == PieceType.pawn and endpos[1] in [1, 8]:
             piece.settype(PieceType.queen)
@@ -561,46 +573,60 @@ class ChessLogic:
             return ChessState.draw
         return ChessState.inProgress
 
-# class Chess:
-#    board = ChessBoard()
-#    board.setStartBoard()
-#    logic = ChessLogic()
-#    color = True
+class Chess:
+    board = ChessBoard()
+    board.setStartBoard()
+    logic = ChessLogic()
+    color = True
 
-#    def make_move(self, startpos, endpos):
-#        piece = self.board.getpos(startpos[0], startpos[1])
-#        if piece is None:
-#            return False
-#        if piece.gettype() == PieceType.empty or self.color != piece.getColor():
-#            return False
-#        move_result = self.logic.validateMove(startpos, endpos, self.board)
-#        if move_result:
-#            self.board = move_result
-#            self.color = not self.color
-#            return True
-#        return False
-#    def print(self):
-#        self.board.print()
+    def make_move(self, start, end):
+        startpos = self.chessToInts(start)
+        endpos = self.chessToInts(end)
+        piece = self.board.getpos(startpos[0], startpos[1])
+        if piece is None:
+            return False
+        if piece.gettype() == PieceType.empty or self.color != piece.getColor():
+            return False
 
-# game = Chess()
+        move_result = self.logic.validateMove(startpos, endpos, self.board)
+        if move_result:
+            self.board = move_result
+            self.color = not self.color
+            return True
+        return False
 
-# while True:
-#    if game.color:
-#        print("White")
+    def chessToInts(self, chessPos):
+        return Pos.colDict.get(chessPos[0]), int(chessPos[1])
 
-#    else:
-#        print("Black")
+    def getState(self):
+        return self.logic.checkState(self.board, self.color)
 
-#    print(game.board.getstate().name)
+    def printBoard(self, board):
+        b = board.Board()
+        color_dict = {True: board.PieceColor.WHITE, False: board.PieceColor.BLACK}
+        p_t_d = {PieceType.pawn: (board.PieceType.PAWN, board.b_pawn_img, board.w_pawn_img),
+                 PieceType.king: (board.PieceType.KING, board.b_king_img, board.w_king_img),
+                 PieceType.queen: (board.PieceType.QUEEN, board.b_queen_img, board.w_queen_img),
+                 PieceType.rook: (board.PieceType.ROOK, board.b_rook_img, board.w_rook_img),
+                 PieceType.bishop: (board.PieceType.BISHOP, board.b_bishop_img, board.w_bishop_img),
+                 PieceType.knight: (board.PieceType.KNIGHT, board.b_knight_img, board.w_knight_img)}
 
-#    game.print()
-#    print()
+        all_pieces = (self.board.getWhitePieces(), self.board.getBlackPieces())
+        updated_pieces = ([], [])
 
-#    start = input()
-#    start_point = (int(start.split(",")[0]), int(start.split(",")[1]))
+        for i in range(len(all_pieces)):
+            for piece in all_pieces[i]:
+                if not piece.getActive():
+                    continue
+                type = piece.gettype()
+                color = piece.getColor()
+                piece_color = color_dict.get(color)
+                piece_info = p_t_d.get(type)
+                white_piece = board.Piece(piece_info[0],
+                                          piece_color,
+                                          piece_info[piece_color.value+1],
+                                          piece.getPosAsString())
+                updated_pieces[i].append(white_piece)
 
-#    end = input()
-#    end_point = (int(end.split(",")[0]), int(end.split(",")[1]))
+        return updated_pieces
 
-#    print("move from " + start + " to " + end)
-#    print(game.make_move(start_point, end_point))

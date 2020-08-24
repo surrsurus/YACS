@@ -1,5 +1,6 @@
 # import socket library
 import socket
+import pickle
 
 class Client:
 	'''Client object providing ability to connect and communicate with server via sockets'''
@@ -17,31 +18,28 @@ class Client:
 			print('[--------------Connection Unsuccessful--------------]')
 			return
 		print('[---------------Connection Successful---------------]')
-		# Upon success, proceed to communicate
-		self.communicate()
 
-	def communicate(self):
-		'''Send chat messages back/forth betweeen client and server'''
-		# Client talks first. Chat continues until one party says the keyword 'goodbye'
-		sentMessage = input('Enter a message or type \'goodbye\' to end the chat: ')
-		while True:
-			self.soc.send(sentMessage.encode())
-			if sentMessage == 'goodbye':
-				break
-			receivedMessage = self.soc.recv(4096).decode()
-			print('Server: {}'.format(receivedMessage))
-			if receivedMessage == 'goodbye':
-				break
-			sentMessage = input('Enter a message or type \'goodbye\' to end the chat: ')
-		# Upon chat termination, proceed to disconnect
-		self.disconnect()
+	# def communicate(self):
+	# 	'''Send chat messages back/forth betweeen client and server'''
+	# 	# Client talks first. Chat continues until one party says the keyword 'goodbye'
+	# 	sentMessage = input('Enter a message or type \'goodbye\' to end the chat: ')
+	# 	while True:
+	# 		self.soc.send(sentMessage.encode())
+	# 		if sentMessage == 'goodbye':
+	# 			break
+	# 		receivedMessage = self.soc.recv(4096).decode()
+	# 		print('Server: {}'.format(receivedMessage))
+	# 		if receivedMessage == 'goodbye':
+	# 			break
+	# 		sentMessage = input('Enter a message or type \'goodbye\' to end the chat: ')
 	
+	def send(self, thing):
+		self.soc.send(pickle.dumps(thing))
+
+	def recieve(self):
+		return pickle.loads(self.soc.recv(4096))
+
 	def disconnect(self):
 		'''Disconnect from server'''
 		self.soc.close()
 		print('[--------------------Disconnected-------------------]')
-
-IP_ADDRESS = 'localhost'
-PORT = 25565
-test = Client(IP_ADDRESS, PORT)
-test.connect()
