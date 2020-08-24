@@ -1,5 +1,6 @@
 # import socket library
 import socket
+import pickle
 
 class Server:
 	'''Server object providing ability to start a server and accept connections via sockets'''
@@ -32,10 +33,10 @@ class Server:
 	# 			break
 
 	def send(self, thing):
-		self.connection.send(thing.encode())
+		self.connection.send(pickle.dumps(thing))
 
 	def recieve(self):
-		return self.connection.recv(4096).decode()
+		return pickle.loads(self.connection.recv(4096))
 
 	def stopServer(self):
 		'''Stop server'''
