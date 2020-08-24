@@ -77,12 +77,10 @@ while not done:
             client.connect()
             clientNotInitialized = False
         if firstTurn:
-            # theirmove = client.recieve()
-            # board.move(theirmove)
+            board = client.recieve()
             firstTurn = False
         else:
             if board.getValidMoveHasHappened():
-                move = board.getValidMove()
                 client.send(board)
                 # exit here on checkmate
                 board = client.recieve()
@@ -94,6 +92,6 @@ while not done:
     pygame.display.flip()
  
 # Program will hang on exit without this
-if client: client.disconnect()
-if server: server.stopServer()
+if not clientNotInitialized: client.disconnect()
+if not serverNotInitialized: server.stopServer()
 pygame.quit()

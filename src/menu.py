@@ -205,7 +205,7 @@ ELEMENT_LAYOUTS = {
         Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
     2: [Text("Joining Game", (50, 15), 100),
-        Text("Please enter the IP address from the Host", (50, 25), 40),
+        Text("Please enter the IP address from the Host", (50, 50), 40),
         InputBox(275,400,500,32),
         Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
     3: [
@@ -218,7 +218,7 @@ ELEMENT_LAYOUTS = {
     ],
     5: [
         Text("Hosting Game", (50, 15), 100),
-        Text("Please enter your own IP Address", (50, 25), 40),
+        Text("Please enter your own IP Address", (50, 50), 40),
         InputBox(275,400,500,32),
         Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
