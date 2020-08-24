@@ -136,6 +136,9 @@ COLOR_ACTIVE = pygame.Color('dodgerblue2')
 FONT = pygame.font.Font(None, 32)
 clock = pygame.time.Clock()
 
+IP = None
+def getIpFromTextBox():
+    return IP
 
 class InputBox:
 
@@ -147,6 +150,7 @@ class InputBox:
         self.active = False
 
     def handle_event(self):
+        global IP
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.rect.collidepoint(event.pos):
@@ -157,8 +161,12 @@ class InputBox:
             if event.type == pygame.KEYDOWN:
                 if self.active:
                     if event.key == pygame.K_RETURN:
-                        self.text = ''
-                        #call whatever network
+                        if MenuManager.CURRENT == MenuManager.MENU_JOIN:
+                            IP = self.text
+                            MenuManager.goto(MenuManager.GAME_CLIENT)
+                        elif MenuManager.CURRENT == MenuManager.MENU_HOST:
+                            IP = self.text
+                            MenuManager.goto(MenuManager.GAME_SERVER)
                     elif event.key == pygame.K_BACKSPACE:
                         self.text = self.text[:-1]
                     else:

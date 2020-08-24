@@ -58,7 +58,8 @@ while not done:
         # If the above is true, the player who clicked "Host Game" is now on the game screen
         # Accept connection if needed, otherwise wait for host to take turn and then send it to client
         if serverNotInitialized:
-            server = Server("192.168.192.209", 25565)
+            ip = menu.getIpFromTextBox()
+            server = Server(ip, 25565)
             server.startServer()
             serverNotInitialized = False
         if board.getValidMoveHasHappened():
@@ -71,7 +72,8 @@ while not done:
         # If the above is true, the player who clicked "Join Game" is now on the game screen
         # Wait for player to take turn and then send it to server
         if clientNotInitialized:
-            client = Client("192.168.192.209", 25565)
+            ip = menu.getIpFromTextBox()
+            client = Client(ip, 25565)
             client.connect()
             clientNotInitialized = False
         if firstTurn:
@@ -92,6 +94,6 @@ while not done:
     pygame.display.flip()
  
 # Program will hang on exit without this
-client.disconnect()
-server.stopServer()
+if client: client.disconnect()
+if server: server.stopServer()
 pygame.quit()
