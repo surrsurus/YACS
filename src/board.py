@@ -188,6 +188,7 @@ class Board(object):
                 if self.game.make_move(self.last_clicked.coord, current_clicked.coord):
                     self.updatePieces()
                     self.validMoveHasHappened = True
+                    self.validMove = (self.last_clicked.coord, current_clicked.coord)
                 current_clicked.active_color = current_clicked.color
 
                 # Reset color of last clicked tile
