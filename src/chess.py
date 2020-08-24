@@ -601,7 +601,7 @@ class Chess:
     def getState(self):
         return self.logic.checkState(self.board, self.color)
 
-    def printBoard(self):
+    def printBoard(self, board):
         b = board.Board()
         color_dict = {True: board.PieceColor.WHITE, False: board.PieceColor.BLACK}
         p_t_d = {PieceType.pawn: (board.PieceType.PAWN, board.b_pawn_img, board.w_pawn_img),
