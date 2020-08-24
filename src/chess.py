@@ -1,7 +1,5 @@
 import copy
 import enum
-import board
-
 
 class ChessState(enum.Enum):
     inProgress = 1
@@ -602,7 +600,7 @@ class Chess:
         return self.logic.checkState(self.board, self.color)
 
     def printBoard(self):
-        b = board.Board()
+        import board
         color_dict = {True: board.PieceColor.WHITE, False: board.PieceColor.BLACK}
         p_t_d = {PieceType.pawn: (board.PieceType.PAWN, board.b_pawn_img, board.w_pawn_img),
                  PieceType.king: (board.PieceType.KING, board.b_king_img, board.w_king_img),
