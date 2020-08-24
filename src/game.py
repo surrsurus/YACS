@@ -79,6 +79,8 @@ while not done:
             client.connect()
             clientNotInitialized = False
         if firstTurn:
+            screen.fill(util.WHITE)
+            MenuManager.drawCurrent(screen)
             theirMove = client.recieve()
             board.move(theirMove)
             firstTurn = False
