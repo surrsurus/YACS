@@ -209,11 +209,11 @@ ELEMENT_LAYOUTS = {
         InputBox(275,400,500,32),
         Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
     3: [
-        board.Board(),
+        None,
         Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
     4: [
-        board.Board(),
+        None,
         Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
     5: [
