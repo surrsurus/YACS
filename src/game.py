@@ -67,7 +67,10 @@ while not done:
             server.send(move)
             # exit here on checkmate
             theirMove = server.recieve()
-            board.move(theirMove)
+            board.game.make_move(theirMove)
+            board.updatePieces()
+            menu.updateBoards(board)
+
 
     elif MenuManager.CURRENT == MenuManager.GAME_CLIENT:
         # Client loop. 
@@ -82,7 +85,9 @@ while not done:
             clientNotInitialized = False
         if firstTurn:
             theirMove = client.recieve()
-            board.move(theirMove)
+            board.game.make_move(theirMove)
+            board.updatePieces()
+            menu.updateBoards(board)
             firstTurn = False
         else:
             if board.getValidMoveHasHappened():
@@ -90,7 +95,9 @@ while not done:
                 client.send(move)
                 # exit here on checkmate
                 theirMove = client.recieve()
-                board.move(theirMove)
+                board.game.make_move(theirMove)
+                board.updatePieces()
+                menu.updateBoards(board)
  
     # FPS Limiter
     clock.tick(60)
