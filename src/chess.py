@@ -1,6 +1,6 @@
 import copy
 import enum
-import board
+# import board
 
 
 class ChessState(enum.Enum):
