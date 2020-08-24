@@ -10,6 +10,7 @@ class MenuManager():
     MENU_MAIN     = None
     MENU_SETTINGS = None
     MENU_JOIN     = None
+    MENU_HOST     = None
     GAME_SERVER   = None
     GAME_CLIENT   = None
     CURRENT       = None
@@ -29,6 +30,7 @@ class MenuManager():
         MenuManager.MENU_JOIN     = Menu(MenuManager.WINDOW_SIZE, 2)
         MenuManager.GAME_SERVER   = Menu(MenuManager.WINDOW_SIZE, 3)
         MenuManager.GAME_CLIENT   = Menu(MenuManager.WINDOW_SIZE, 4)
+        MenuManager.MENU_HOST     = Menu(MenuManager.WINDOW_SIZE, 5)
         MenuManager.CURRENT = MenuManager.MENU_MAIN
     
     @staticmethod
@@ -129,6 +131,55 @@ class Text():
         text_rect = text.get_rect(center = self.exactLocation)
         screen.blit(text, text_rect)
         
+COLOR_INACTIVE = pygame.Color('red')
+COLOR_ACTIVE = pygame.Color('dodgerblue2')
+FONT = pygame.font.Font(None, 32)
+clock = pygame.time.Clock()
+
+
+class InputBox:
+
+    def __init__(self, x, y, w, h, text=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = COLOR_INACTIVE
+        self.text = text
+        self.txt_surface = FONT.render(text,True, (0,0,0))
+        self.active = False
+
+    def handle_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.rect.collidepoint(event.pos):
+                    self.active = not self.active
+                else:
+                    self.active = False        
+                self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
+            if event.type == pygame.KEYDOWN:
+                if self.active:
+                    if event.key == pygame.K_RETURN:
+                        self.text = ''
+                        #call whatever network
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.text = self.text[:-1]
+                    else:
+                        try:
+                            self.text += event.unicode
+                        except:
+                            pass
+                    self.txt_surface = FONT.render(self.text, True, self.color)
+
+    def update(self):
+        width = max(200, self.txt_surface.get_width()+10)
+        self.rect.w = width
+    def draw(self, screen):
+        timer = 0
+        timer += clock.tick(60)
+        self.handle_event()
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        pygame.draw.rect(screen, self.color, self.rect, 2)
+        #text_rect = self.txt_surface.get_rect(center = self.rect.center)
+        #screen.blit(self.txt_surface, text_rect)
+
 def updateBoards(board):
     ELEMENT_LAYOUTS[3][0] = board
     ELEMENT_LAYOUTS[4][0] = board
@@ -137,7 +188,7 @@ ELEMENT_LAYOUTS = {
     0: [
         Text("YACS", (50, 15), 100),
         Text("Yet Another Chess Simulator", (50, 25), 40),
-        Button("Host Game", (50, 50), lambda pos: MenuManager.goto(MenuManager.GAME_SERVER)),
+        Button("Host Game", (50, 50), lambda pos: MenuManager.goto(MenuManager.MENU_HOST)),
         Button("Join Game", (50, 65), lambda pos: MenuManager.goto(MenuManager.MENU_JOIN)),
         Button("Settings", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_SETTINGS)),
     ],
@@ -145,7 +196,10 @@ ELEMENT_LAYOUTS = {
         ButtonWithIndicator("Setting1", (46, 30)),
         Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
-    2: [Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
+    2: [Text("Joining Game", (50, 15), 100),
+        Text("Please enter the IP address from the Host", (50, 25), 40),
+        InputBox(275,400,500,32),
+        Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),],
     3: [
         board.Board(),
         Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
@@ -153,5 +207,11 @@ ELEMENT_LAYOUTS = {
     4: [
         board.Board(),
         Button("Quit Game", (80, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
+    ],
+    5: [
+        Text("Hosting Game", (50, 15), 100),
+        Text("Please enter your own IP Address", (50, 25), 40),
+        InputBox(275,400,500,32),
+        Button("Go Back", (50, 80), lambda pos: MenuManager.goto(MenuManager.MENU_MAIN)),
     ],
 }
